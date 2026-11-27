@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Gamer Chat - Seguro & Criptografado</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --panel-bg: #161616;
+            --neon-green: #00ff66;
+            --neon-dim: #00b347;
+            --neon-red: #ff3333;
+            --text-color: #e0e0e0;
+            --border-color: #00ff6633;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            height: 90vh;
+            background: var(--panel-bg);
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-dim);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Telas */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Tela de Login */
+        #login-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: var(--neon-green);
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            border-radius: 4px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        button {
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 350px;
+            font-size: 1rem;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: var(--neon-dim);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        /* Tela de Chat */
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .chat-header span {
+            color: var(--neon-green);
+            font-size: 0.9rem;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background: #050505;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message-card {
+            background: #111;
+            border-left: 3px solid var(--neon-green);
+            padding: 8px 10px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .message-card.denunciada {
+            border-left-color: var(--neon-red);
+            opacity: 0.6;
+        }
+
+        .msg-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .msg-user {
+            color: var(--neon-green);
+            font-weight: bold;
+        }
+
+        .msg-text {
+            word-break: break-all;
+            color: #fff;
+        }
+
+        .btn-denunciar {
+            background: transparent;
+            color: var(--neon-red);
+            border: 1px solid var(--neon-red);
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 5px;
+            width: auto;
+        }
+
+        .btn-denunciar:hover {
+            background: var(--neon-red);
+            color: #000;
+            box-shadow: 0 0 5px var(--neon-red);
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+        }
+
+        .chat-input-area button {
+            width: 100px;
+            margin-top: 0;
+        }
+
+        /* Alerta de Erro/Filtro */
+        #alert-box {
+            color: var(--neon-red);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            min-height: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- TELA DE LOGIN -->
+        <div id="login-screen" class="screen active">
+            <h1>// NEON_CHAT_LOGIN</h1>
+            <div class="input-group">
+                <label>APELIDO DO JOGADOR:</label>
+                <input type="text" id="nickname" placeholder="Ex: CyberNinja" maxlength="20">
+            </div>
+            <div class="input-group">
+                <label>CHAVE SECRETA DA SALA:</label>
+                <input type="password" id="room-key" placeholder="Senha compartilhada">
+            </div>
+            <button onclick="entrarChat()">CONECTAR À SALA</button>
+            <div id="alert-box"></div>
+        </div>
+
+        <!-- TELA DO CHAT -->
+        <div id="chat-screen" class="screen">
+            <div class="chat-header">
+                <span id="room-status">SALA: ATIVA</span>
+                <button onclick="sairChat()" style="width: auto; padding: 5px 10px; margin-top: 0; background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red); font-size: 0.8rem;">SAIR</button>
+            </div>
+            
+            <div class="messages-container" id="messages-list">
+                <!-- As mensagens entram aqui -->
+            </div>
+
+            <div id="chat-alert" style="color: var(--neon-red); font-size: 0.75rem; height: 15px; margin-top: 4px;"></div>
+
+            <div class="chat-input-area">
+                <input type="text" id="message-input" placeholder="Digite sua mensagem..." onkeypress="handleKeyPress(event)">
+                <button onclick="enviarMensagem()">ENVIAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === COLE AQUI SUA URL DO GOOGLE APPS SCRIPT ===
+        const APPS_SCRIPT_URL = "COLE_AQUI_SUA_URL_DO_WEB_APP_DO_APPS_SCRIPT";
+
+        let currentUser = "";
+        let currentKey = "";
+        let refreshInterval = null;
+
+        // Lista simples de palavras impróprias para o filtro automático (exemplo básico em PT)
+        const blacklist = ["palavrao1", "ofensa1", "xingamento1", "idiota", "imbecil", "otario", "bosta", "merda", "puta", "caralho", "porra"];
+
+        // Função de Criptografia combinando XOR + Base64
+        function encryptText(text, key) {
+            if (!text) return "";
+            let xored = "";
+            for (let i = 0; i < text.length; i++) {
+                let charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                xored += String.fromCharCode(charCode);
+            }
+            try {
+                return btoa(encodeURIComponent(xored));
+            } catch (e) {
+                return btoa(xored);
+            }
+        }
+
+        // Função de Descriptografia reversa
+        function decryptText(encryptedBase64, key) {
+            if (!encryptedBase64) return "[Mensagem Vazia]";
+            try {
+                let xored = atob(encryptedBase64);
+                try {
+                    xored = decodeURIComponent(xored);
+                } catch (e) {
+                    // Mantém como está se falhar a decodificação URI
+                }
+                let original = "";
+                for (let i = 0; i < xored.length; i++) {
+                    let charCode = xored.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                    original += String.fromCharCode(charCode);
+                }
+                return original;
+            } catch (e) {
+                return "[Chave incorreta ou dado corrompido]";
+            }
+        }
+
+        function entrarChat() {
+            const nick = document.getElementById("nickname").value.trim();
+            const key = document.getElementById("room-key").value.trim();
+            const alertBox = document.getElementById("alert-box");
+
+            if (!nick || !key) {
+                alertBox.innerText = "ERRO: Preencha o apelido e a chave da sala!";
+                return;
+            }
+
+            if (APPS_SCRIPT_URL.includes("COLE_AQUI")) {
+                alertBox.innerText = "ERRO: Configure a URL do Apps Script no código!";
+                return;
+            }
+
+            currentUser = nick;
+            currentKey = key;
+
+            document.getElementById("login-screen").classList.remove("active");
+            document.getElementById("chat-screen").classList.add("active");
+            document.getElementById("room-status").innerText = `SALA: ${nick.toUpperCase()}`;
+
+            carregarMensagens();
+            // Atualiza a cada 4 segundos
+            refreshInterval = setInterval(carregarMensagens, 4000);
+        }
+
+        function sairChat() {
+            clearInterval(refreshInterval);
+            currentUser = "";
+            currentKey = "";
+            document.getElementById("chat-screen").classList.remove("active");
+            document.getElementById("login-screen").classList.add("active");
+            document.getElementById("message-input").value = "";
+        }
+
+        function validarFiltro(texto) {
+            const textoLower = texto.toLowerCase();
+            for (let palavra of blacklist) {
+                if (textoLower.includes(palavra)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function enviarMensagem() {
+            const input = document.getElementById("message-input");
+            const alertEl = document.getElementById("chat-alert");
+            const texto = input.value.trim();
+
+            if (!texto) return;
+
+            // 3. Filtro automático de ofensas
+            if (!validarFiltro(texto)) {
+                alertEl.innerText = "AVISO: Mensagem bloqueada pelo filtro de moderação!";
+                setTimeout(() => { alertEl.innerText = ""; }, 4000);
+                return;
+            }
+
+            alertEl.innerText = "";
+            input.value = "";
+
+            // Criptografa dados antes de enviar
+            const payload = {
+                usuario_cripto: encryptText(currentUser, currentKey),
+                mensagem_cripto: encryptText(texto, currentKey)
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", // Necessário para evitar bloqueio de CORS do Google Apps Script
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                setTimeout(carregarMensagens, 1000); // Recarrega logo após enviar
+            })
+            .catch(err => {
+                console.error("Erro ao enviar:", err);
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                enviarMensagem();
+            }
+        }
+
+        function denunciarMensagem(rowNumber) {
+            if (!confirm(`Deseja realmente denunciar a linha #${rowNumber}?`)) return;
+
+            const alertEl = document.getElementById("chat-alert");
+            alertEl.innerText = `Enviando denúncia para a linha ${rowNumber}...`;
+
+            fetch(`${APPS_SCRIPT_URL}?row=${rowNumber}`)
+            .then(res => res.json())
+            .then(data => {
+                alertEl.innerText = `Linha ${rowNumber} marcada como DENUNCIADA com sucesso!`;
+                setTimeout(() => { alertEl.innerText = ""; }, 4000);
+                carregarMensagens();
+            })
+            .catch(err => {
+                // Como no-cors ou GET direto pode retornar erro de parsing dependendo da implantação, tratamos o reload
+                alertEl.innerText = `Denúncia enviada para a linha ${rowNumber}!`;
+                setTimeout(() => { alertEl.innerText = ""; }, 4000);
+                carregarMensagens();
+            });
+        }
+
+        function carregarMensagens() {
+            fetch(APPS_SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById("messages-list");
+                listContainer.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    listContainer.innerHTML = `<div style="color: #666; text-align: center; margin-top: 20px;">Nenhuma mensagem na sala ainda.</div>`;
+                    return;
+                }
+
+                data.forEach(item => {
+                    // Descriptografa com a chave da sala inserida pelo usuário
+                    const userDecrypted = decryptText(item.usuario_cripto, currentKey);
+                    const msgDecrypted = decryptText(item.mensagem_cripto, currentKey);
+                    const isDenunciada = item.status_denuncia === "DENUNCIADA";
+
+                    const card = document.createElement("div");
+                    card.className = `message-card ${isDenunciada ? 'denunciada' : ''}`;
+
+                    card.innerHTML = `
+                        <div class="msg-info">
+                            <span class="msg-user">@${escapeHtml(userDecrypted)}</span>
+                            <span>${item.data_hora ? new Date(item.data_hora).toLocaleTimeString() : ''}</span>
+                        </div>
+                        <div class="msg-text">${escapeHtml(msgDecrypted)}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <span style="font-size: 0.7rem; color: ${isDenunciada ? 'var(--neon-red)' : '#00ff66'};">
+                                Status: ${escapeHtml(item.status_denuncia || 'Ativo')}
+                            </span>
+                            ${!isDenunciada ? `<button class="btn-denunciar" onclick="denunciarMensagem(${item.row_number})">DENUNCIAR</button>` : ''}
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+
+                // Auto scroll para a última mensagem
+                listContainer.scrollTop = listContainer.scrollHeight;
+            })
+            .catch(err => {
+                console.error("Erro ao carregar mensagens:", err);
+            });
+        }
+
+        // Função simples para evitar injeção de HTML no chat
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
