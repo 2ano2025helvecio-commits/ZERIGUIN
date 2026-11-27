@@ -261,8 +261,8 @@
     </div>
 
     <script>
-        // === COLE AQUI SUA URL DO GOOGLE APPS SCRIPT ===
-        const APPS_SCRIPT_URL = "COLE_AQUI_SUA_URL_DO_WEB_APP_DO_APPS_SCRIPT";
+        // === SUA URL DO GOOGLE APPS SCRIPT JÁ INCLUIDA ===
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwItlSdqKtozD9psxe6_UVAaPFGfeyKfa7faUunrse908oH5qVDSyVNerjOyGkQjJa2kA/exec";
 
         let currentUser = "";
         let currentKey = "";
@@ -317,11 +317,6 @@
                 return;
             }
 
-            if (APPS_SCRIPT_URL.includes("COLE_AQUI")) {
-                alertBox.innerText = "ERRO: Configure a URL do Apps Script no código!";
-                return;
-            }
-
             currentUser = nick;
             currentKey = key;
 
@@ -360,7 +355,7 @@
 
             if (!texto) return;
 
-            // 3. Filtro automático de ofensas
+            // Filtro automático de ofensas
             if (!validarFiltro(texto)) {
                 alertEl.innerText = "AVISO: Mensagem bloqueada pelo filtro de moderação!";
                 setTimeout(() => { alertEl.innerText = ""; }, 4000);
@@ -410,7 +405,6 @@
                 carregarMensagens();
             })
             .catch(err => {
-                // Como no-cors ou GET direto pode retornar erro de parsing dependendo da implantação, tratamos o reload
                 alertEl.innerText = `Denúncia enviada para a linha ${rowNumber}!`;
                 setTimeout(() => { alertEl.innerText = ""; }, 4000);
                 carregarMensagens();
